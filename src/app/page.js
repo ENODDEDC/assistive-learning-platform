@@ -1,62 +1,69 @@
-import Image from 'next/image'
+"use client";
 
-export default async function Home() {
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+
+export default function Home() {
+  const [content, setContent] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || '';
+
+  const fetchContent = async (search = '') => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (search) {
+        params.set('search', search);
+      }
+      const res = await fetch(`/api/content?${params.toString()}`);
+      const data = await res.json();
+      if (data.success) {
+        setContent(data.data);
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchContent(searchTerm);
+  }, [searchTerm]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 text-white bg-gray-900">
-      <h1 className="mb-4 text-6xl font-bold">
-        Welcome to{' '}
-        <a className="text-blue-500 hover:text-blue-400" href="https://nextjs.org">
-          Next.js!
-        </a>
-      </h1>
+    <div className="min-h-screen py-2 bg-gray-100">
+      <main className="container p-4 mx-auto">
+        <h1 className="mb-8 text-4xl font-bold text-center text-gray-800">
+          Discover Learning Materials
+        </h1>
 
-      <p className="mt-3 text-2xl">
-        This project is configured with{' '}
-        <code className="p-3 font-mono text-lg bg-gray-800 rounded-md">
-          Tailwind CSS v3
-        </code>{' '}
-        and the App Router.
-      </p>
+        {loading && <p className="text-center text-gray-600">Loading content...</p>}
+        {error && <p className="text-center text-red-500">Error: {error}</p>}
 
-      <div className="flex flex-wrap items-center justify-around max-w-4xl mt-6 sm:w-full">
-        <a
-          href="https://nextjs.org/docs"
-          className="p-6 mt-6 text-left transition-colors border-2 border-gray-700 w-96 rounded-xl hover:text-blue-500 hover:border-blue-500 focus:text-blue-500"
-        >
-          <h3 className="text-2xl font-bold">Documentation &rarr;</h3>
-          <p className="mt-4 text-xl">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+        {!loading && !error && content.length === 0 && (
+          <p className="text-center text-gray-600">No content found. Try adjusting your search.</p>
+        )}
 
-        <a
-          href="https://tailwindcss.com/docs"
-          className="p-6 mt-6 text-left transition-colors border-2 border-gray-700 w-96 rounded-xl hover:text-blue-500 hover:border-blue-500 focus:text-blue-500"
-        >
-          <h3 className="text-2xl font-bold">Tailwind CSS Docs &rarr;</h3>
-          <p className="mt-4 text-xl">
-            Explore the official Tailwind CSS documentation.
-          </p>
-        </a>
-      </div>
-
-      <footer className="flex items-center justify-center w-full h-24 mt-8 border-t border-gray-700">
-        <a
-          className="flex items-center justify-center"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image
-            src="/vercel.svg"
-            alt="Vercel Logo"
-            className="h-4 ml-2"
-            width={76}
-            height={16}
-          />
-        </a>
-      </footer>
+        <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-3">
+          {content.map((item) => (
+            <div key={item._id} className="p-6 transition-shadow duration-300 bg-white rounded-lg shadow-md hover:shadow-lg">
+              <h2 className="mb-2 text-xl font-semibold text-gray-900">{item.title}</h2>
+              <p className="mb-4 text-gray-700">{item.description}</p>
+              <div className="text-sm text-gray-600">
+                <p><strong>Subject:</strong> {item.subject}</p>
+                <p><strong>Grade:</strong> {item.grade}</p>
+                <p><strong>Learning Goal:</strong> {item.learningGoal}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   );
 }

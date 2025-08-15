@@ -1,14 +1,49 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const Navbar = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+
+  const handleSearch = () => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    if (searchTerm) {
+      currentParams.set('search', searchTerm);
+    } else {
+      currentParams.delete('search');
+    }
+    router.push(`/?${currentParams.toString()}`);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
-    <nav className="bg-gray-600 shadow-md p-4 flex justify-end items-center">
-      <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold h-10 w-10 flex items-center justify-center rounded-full mr-4 text-lg">
-        +
-      </button>
-      <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
-        Profile
-      </button>
+    <nav className="flex items-center justify-between p-4 bg-gray-600 shadow-md">
+      <div className="text-2xl font-bold text-white">Assistive Learning</div>
+      <div className="flex items-center">
+        <input
+          type="text"
+          placeholder="Search content..."
+          className="p-2 mr-2 text-gray-800 rounded-md"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={handleKeyPress}
+        />
+        <button
+          onClick={handleSearch}
+          className="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700"
+        >
+          Search
+        </button>
+      </div>
     </nav>
   );
 };
