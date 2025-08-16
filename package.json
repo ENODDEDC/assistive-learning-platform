@@ -2,11 +2,13 @@
   "name": "assistive-learning-platform",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node --env-file=.env.local scripts/seedAdmin.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

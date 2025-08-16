@@ -43,6 +43,12 @@ const Navbar = () => {
         >
           Search
         </button>
+        <button
+          onClick={() => router.push('/admin')}
+          className="px-4 py-2 ml-2 font-bold text-white bg-green-500 rounded hover:bg-green-700"
+        >
+          Admin
+        </button>
       </div>
     </nav>
   );
